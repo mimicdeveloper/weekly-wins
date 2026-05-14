@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Weekly Wins — AI Work Summary</title>
+<meta name="description" content="Capture your week, summarize it with AI, download a polished PDF. Your data never leaves your browser." />
+<meta name="theme-color" content="#C7522A" />
+<meta property="og:title" content="Weekly Wins — AI Work Summary" />
+<meta property="og:description" content="Capture your week, summarize it with AI, download a polished PDF. Your data never leaves your browser." />
+<meta property="og:type" content="website" />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%23C7522A%22%2F%3E%3Cpath%20d%3D%22M32%2014%20L36%2026%20L48%2026%20L38%2034%20L42%2046%20L32%2038%20L22%2046%20L26%2034%20L16%2026%20L28%2026%20Z%22%20fill%3D%22white%22%2F%3E%3C%2Fsvg%3E" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #FAF7F2;
+    --card: #FFFFFF;
+    --ink: #1F2330;
+    --ink-soft: #535A6B;
+    --line: #E8E2D7;
+    --accent: #C7522A;
+    --accent-soft: #FBE4D8;
+    --gold: #D4A24C;
+    --green: #4A7C59;
+    --shadow: 0 1px 2px rgba(31,35,48,.04), 0 8px 24px rgba(31,35,48,.05);
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 32px 24px 120px;
+  }
+  header.hero {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  header.hero h1 {
+    font-size: 30px;
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+  }
+  header.hero p {
+    margin: 0;
+    color: var(--ink-soft);
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow);
+  }
+  .card h2 {
+    font-size: 18px;
+    margin: 0 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card .hint {
+    color: var(--ink-soft);
+    font-size: 13px;
+    margin: 0 0 16px;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  @media (max-width: 600px) {
+    .row { grid-template-columns: 1fr; }
+  }
+  label {
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  input[type="text"], input[type="number"], textarea {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: #FCFAF6;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font: inherit;
+    color: var(--ink);
+    resize: vertical;
+    transition: border-color .15s, background .15s;
+  }
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: #fff;
+  }
+  textarea { min-height: 60px; }
+  .day {
+    border-top: 1px dashed var(--line);
+    padding-top: 16px;
+    margin-top: 16px;
+  }
+  .day:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
+  .day h3 {
+    font-size: 15px;
+    margin: 0 0 10px;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .day .row { grid-template-columns: 1fr; gap: 10px; }
+  .day-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  @media (max-width: 600px) {
+    .day-grid { grid-template-columns: 1fr; }
+  }
+  .actions {
+    position: sticky;
+    bottom: 16px;
+    background: rgba(250,247,242,.92);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 14px;
+    margin-top: 28px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    box-shadow: var(--shadow);
+  }
+  button {
+    font: inherit;
+    font-weight: 600;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--ink);
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform .05s, background .15s, border-color .15s;
+  }
+  button:hover { background: #F5F0E6; }
+  button:active { transform: translateY(1px); }
+  button.primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  button.primary:hover { background: #B0461F; }
+  button.ghost { background: transparent; }
+  .summary-box {
+    background: var(--accent-soft);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-top: 10px;
+    white-space: pre-wrap;
+    font-size: 14px;
+    min-height: 60px;
+    color: var(--ink);
+  }
+  .summary-box.empty {
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+  .badge {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 2px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 999px;
+    margin-left: 4px;
+  }
+  .saved-indicator {
+    text-align: center;
+    color: var(--green);
+    font-size: 12px;
+    height: 16px;
+    margin-top: 8px;
+    transition: opacity .3s;
+  }
+  details summary {
+    cursor: pointer;
+    color: var(--ink-soft);
+    font-size: 14px;
+    padding: 6px 0;
+  }
+  details summary:hover { color: var(--accent); }
+  .steps {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px 14px;
+    margin-top: 12px;
+    font-size: 14px;
+  }
+  .step-num {
+    background: var(--accent);
+    color: #fff;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .toast {
+    position: fixed;
+    bottom: 92px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s;
+    z-index: 100;
+  }
+  .toast.show { opacity: 1; }
+  .footer {
+    margin-top: 36px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 13px;
+  }
+  .footer p { margin: 6px 0; }
+  .footer .privacy {
+    background: #F0F7F2;
+    border: 1px solid #D4E8DA;
+    color: #2E5238;
+    padding: 10px 14px;
+    border-radius: 8px;
+    display: inline-block;
+    max-width: 560px;
+  }
+  .footer .credit { font-size: 12px; opacity: 0.75; }
+
+  /* PDF-only styles */
+  .pdf-root {
+    font-family: "Georgia", "Times New Roman", serif;
+    color: #1F2330;
+    padding: 48px 56px;
+    background: white;
+    width: 800px;
+  }
+  .pdf-root h1 { font-size: 28px; margin: 0 0 6px; }
+  .pdf-root .meta { color: #666; margin-bottom: 24px; font-style: italic; }
+  .pdf-root h2 { font-size: 18px; margin: 22px 0 8px; padding-bottom: 4px; border-bottom: 2px solid #C7522A; color: #C7522A; }
+  .pdf-root h3 { font-size: 14px; margin: 16px 0 6px; color: #1F2330; }
+  .pdf-root p, .pdf-root li { font-size: 12.5px; line-height: 1.55; }
+  .pdf-root ul { padding-left: 22px; margin: 6px 0; }
+  .pdf-root .summary-text { white-space: pre-wrap; font-family: inherit; background: #FBE4D8; padding: 14px 18px; border-radius: 6px; }
+  .pdf-root .day-block { margin-bottom: 10px; }
+  .pdf-root .day-block .label { font-weight: bold; }
+</style>
+</head>
+<body>
+  <div class="app">
+    <header class="hero">
+      <h1>🏆 Weekly Wins</h1>
+      <p>Your week, captured. Then summarized by AI. Then sent home as a PDF or Markdown file.</p>
+    </header>
+
+    <!-- Week meta -->
+    <div class="card">
+      <h2>The week</h2>
+      <p class="hint">Fill these in Monday morning, before opening the calendar.</p>
+      <div class="row">
+        <div>
+          <label for="weekNum">Week number</label>
+          <input type="text" id="weekNum" placeholder="e.g. 19" />
+        </div>
+        <div>
+          <label for="dateRange">Date range</label>
+          <input type="text" id="dateRange" placeholder="e.g. May 11 – May 15" />
+        </div>
+      </div>
+      <label for="intentions">This week's intentions (1–3)</label>
+      <textarea id="intentions" placeholder="What do you want this week to be about?
+-
+-
+- "></textarea>
+    </div>
+
+    <!-- Daily logs -->
+    <div class="card">
+      <h2>Daily log</h2>
+      <p class="hint">A few honest sentences each day. Frictionless beats thorough.</p>
+      <div id="days"></div>
+    </div>
+
+    <!-- Wins, frustrations, learned, next week -->
+    <div class="card">
+      <h2>The reflection</h2>
+      <p class="hint">Friday 10-minute ritual. Honest with yourself.</p>
+
+      <label for="wins">🏆 Wins this week</label>
+      <textarea id="wins" placeholder="Anything I finished, solved, launched, shipped, or got recognized for. Independent saves get a ⭐."></textarea>
+
+      <label for="frustrations" style="margin-top:12px;">😤 Frustrations this week</label>
+      <textarea id="frustrations" placeholder="Honest. Separate 'the thing was hard' from 'this person/process made it hard.'"></textarea>
+
+      <label for="learned" style="margin-top:12px;">💡 Learned</label>
+      <textarea id="learned" placeholder="Skill, tool, concept, or insight about how the org works."></textarea>
+
+      <label for="nextWeek" style="margin-top:12px;">🔮 Next week</label>
+      <textarea id="nextWeek" placeholder="Carry-overs and new priorities."></textarea>
+    </div>
+
+    <!-- AI summary -->
+    <div class="card">
+      <h2>AI Summary <span class="badge">No API key needed</span></h2>
+      <p class="hint">Use your existing AI chat subscription — no tokens, no setup.</p>
+
+      <div class="steps">
+        <span class="step-num">1</span>
+        <div>Click <b>Copy AI prompt</b> — your week's data + a polished prompt is copied to your clipboard.</div>
+        <span class="step-num">2</span>
+        <div>Open your AI chat tool in a new tab, paste, hit send.</div>
+        <span class="step-num">3</span>
+        <div>Copy the reply, paste it below.</div>
+        <span class="step-num">4</span>
+        <div>Click <b>Download PDF</b> or <b>Download Markdown</b>.</div>
+      </div>
+
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:16px;">
+        <button class="primary" id="copyPromptBtn">📋 Copy AI prompt</button>
+        <button class="ghost" id="previewPromptBtn">Preview prompt</button>
+      </div>
+
+      <label for="aiSummary" style="margin-top:18px;">Paste the AI reply here</label>
+      <textarea id="aiSummary" placeholder="Paste the AI summary here — it'll be included on the PDF." rows="6"></textarea>
+
+      <details style="margin-top:10px;">
+        <summary>What goes in the prompt? (advanced)</summary>
+        <pre id="promptPreview" style="background:#F5F0E6; padding:12px; border-radius:8px; white-space:pre-wrap; font-size:12px; max-height:240px; overflow:auto;"></pre>
+      </details>
+    </div>
+
+    <!-- Sticky action bar -->
+    <div class="actions">
+      <button id="downloadPdfBtn" class="primary">⬇ Download PDF</button>
+      <button id="downloadMdBtn">⬇ Download Markdown</button>
+      <button id="clearBtn" class="ghost">Reset week</button>
+    </div>
+    <div class="saved-indicator" id="savedIndicator"></div>
+
+    <footer class="footer">
+      <p class="privacy">
+        🔒 <b>Your data stays in your browser.</b> Nothing is sent to any server.
+        Drafts are stored locally on this device only. Clear your browser data and it's gone.
+      </p>
+      <p class="credit">
+        Template by <b>Bianca</b>. Built as a self-contained web app — no accounts, no tracking, no API costs.
+      </p>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+const FIELDS = ["meetings", "did", "blocked", "felt"];
+const FIELD_LABELS = {
+  meetings: "Meetings",
+  did: "Did",
+  blocked: "Stuck on / blocked by",
+  felt: "Felt"
+};
+
+const STORAGE_KEY = "weeklyWins.v1";
+
+// ---- Build the daily log UI ----
+const daysContainer = document.getElementById("days");
+DAYS.forEach(day => {
+  const wrap = document.createElement("div");
+  wrap.className = "day";
+  wrap.innerHTML = `
+    <h3>${day}</h3>
+    <div class="row">
+      <div>
+        <label for="${day}-date">Date</label>
+        <input type="text" id="${day}-date" data-day="${day}" data-field="date" placeholder="e.g. May 12" />
+      </div>
+    </div>
+    <div class="day-grid">
+      ${FIELDS.map(f => `
+        <div>
+          <label for="${day}-${f}">${FIELD_LABELS[f]}</label>
+          <textarea id="${day}-${f}" data-day="${day}" data-field="${f}" rows="2"></textarea>
+        </div>
+      `).join("")}
+    </div>
+  `;
+  daysContainer.appendChild(wrap);
+});
+
+// ---- State ----
+function readState() {
+  const state = {
+    weekNum: document.getElementById("weekNum").value.trim(),
+    dateRange: document.getElementById("dateRange").value.trim(),
+    intentions: document.getElementById("intentions").value.trim(),
+    wins: document.getElementById("wins").value.trim(),
+    frustrations: document.getElementById("frustrations").value.trim(),
+    learned: document.getElementById("learned").value.trim(),
+    nextWeek: document.getElementById("nextWeek").value.trim(),
+    aiSummary: document.getElementById("aiSummary").value.trim(),
+    days: {}
+  };
+  DAYS.forEach(d => {
+    state.days[d] = { date: "", meetings: "", did: "", blocked: "", felt: "" };
+    state.days[d].date = (document.getElementById(`${d}-date`)?.value || "").trim();
+    FIELDS.forEach(f => {
+      state.days[d][f] = (document.getElementById(`${d}-${f}`)?.value || "").trim();
+    });
+  });
+  return state;
+}
+
+function applyState(s) {
+  if (!s) return;
+  const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ""; };
+  setVal("weekNum", s.weekNum);
+  setVal("dateRange", s.dateRange);
+  setVal("intentions", s.intentions);
+  setVal("wins", s.wins);
+  setVal("frustrations", s.frustrations);
+  setVal("learned", s.learned);
+  setVal("nextWeek", s.nextWeek);
+  setVal("aiSummary", s.aiSummary);
+  if (s.days) {
+    DAYS.forEach(d => {
+      const day = s.days[d] || {};
+      setVal(`${d}-date`, day.date);
+      FIELDS.forEach(f => setVal(`${d}-${f}`, day[f]));
+    });
+  }
+}
+
+let saveTimer;
+function saveState() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(readState()));
+      flashSaved();
+    } catch (e) { /* ignore */ }
+    updatePromptPreview();
+  }, 250);
+}
+
+function flashSaved() {
+  const el = document.getElementById("savedIndicator");
+  el.textContent = "✓ Draft saved locally";
+  el.style.opacity = "1";
+  clearTimeout(flashSaved._t);
+  flashSaved._t = setTimeout(() => { el.style.opacity = "0"; }, 1200);
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) applyState(JSON.parse(raw));
+  } catch (e) {}
+}
+
+// Bind change listeners to all inputs/textareas
+document.querySelectorAll("input, textarea").forEach(el => {
+  el.addEventListener("input", saveState);
+});
+
+// ---- Prompt builder ----
+function buildPrompt() {
+  const s = readState();
+  const parts = [];
+  parts.push("You're helping me write a concise, upbeat weekly accomplishments summary for my own records (and possibly to share with my manager).");
+  parts.push("");
+  parts.push("Please return a summary in this structure:");
+  parts.push("1. **Headline** — one sentence capturing the week.");
+  parts.push("2. **Top accomplishments** — 3–5 bullets, each phrased as an action + outcome.");
+  parts.push("3. **What I learned** — 1–3 bullets.");
+  parts.push("4. **Challenges navigated** — 1–3 bullets, framed constructively (not complaining).");
+  parts.push("5. **Looking ahead** — 1–3 bullets on next week's focus.");
+  parts.push("");
+  parts.push("Tone: professional, plain-spoken, no corporate buzzwords. Keep the whole thing under 300 words.");
+  parts.push("");
+  parts.push("---");
+  parts.push("");
+  parts.push(`# Week ${s.weekNum || "[#]"} — ${s.dateRange || "[dates]"}`);
+  if (s.intentions) parts.push("\n## This week's intentions\n" + s.intentions);
+
+  parts.push("\n## Daily log");
+  DAYS.forEach(d => {
+    const day = s.days[d];
+    const hasContent = day.date || day.meetings || day.did || day.blocked || day.felt;
+    if (!hasContent) return;
+    parts.push(`\n### ${d}${day.date ? ` (${day.date})` : ""}`);
+    if (day.meetings) parts.push(`Meetings: ${day.meetings}`);
+    if (day.did) parts.push(`Did: ${day.did}`);
+    if (day.blocked) parts.push(`Stuck on / blocked by: ${day.blocked}`);
+    if (day.felt) parts.push(`Felt: ${day.felt}`);
+  });
+
+  if (s.wins) parts.push("\n## 🏆 Wins\n" + s.wins);
+  if (s.frustrations) parts.push("\n## 😤 Frustrations\n" + s.frustrations);
+  if (s.learned) parts.push("\n## 💡 Learned\n" + s.learned);
+  if (s.nextWeek) parts.push("\n## 🔮 Next week\n" + s.nextWeek);
+
+  return parts.join("\n");
+}
+
+function updatePromptPreview() {
+  document.getElementById("promptPreview").textContent = buildPrompt();
+}
+
+// ---- Toast ----
+const toastEl = document.getElementById("toast");
+function toast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add("show");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => toastEl.classList.remove("show"), 1800);
+}
+
+// ---- Copy prompt ----
+document.getElementById("copyPromptBtn").addEventListener("click", async () => {
+  const text = buildPrompt();
+  try {
+    await navigator.clipboard.writeText(text);
+    toast("✓ Prompt copied — paste into your AI chat");
+  } catch (e) {
+    // Fallback
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    toast("✓ Prompt copied (fallback)");
+  }
+});
+
+document.getElementById("previewPromptBtn").addEventListener("click", () => {
+  const det = document.querySelector("details");
+  det.open = true;
+  det.scrollIntoView({ behavior: "smooth", block: "center" });
+});
+
+// ---- Reset ----
+document.getElementById("clearBtn").addEventListener("click", () => {
+  if (!confirm("Clear all this week's entries? Your data lives only on this device.")) return;
+  localStorage.removeItem(STORAGE_KEY);
+  document.querySelectorAll("input, textarea").forEach(el => el.value = "");
+  updatePromptPreview();
+  toast("Cleared");
+});
+
+// ---- Markdown normalizer (puts proper blank lines between blocks) ----
+function normalizeMd(text) {
+  if (!text) return "";
+  const lines = text.split(/\r?\n/).map(l => l.replace(/\s+$/, ""));
+  const isHeading = l => /^#{1,6}\s/.test(l);
+  const isBullet  = l => /^\s*[-*•+]\s+/.test(l);
+  const isNum     = l => /^\s*\d+[.)]\s+/.test(l);
+  const isBlank   = l => !l.trim();
+  const kindOf = l =>
+    isBlank(l)   ? "blank" :
+    isHeading(l) ? "heading" :
+    isBullet(l)  ? "bullet" :
+    isNum(l)     ? "num" :
+                   "para";
+
+  const out = [];
+  const pushBlank = () => { if (out.length && out[out.length - 1] !== "") out.push(""); };
+  let last = "start";
+
+  for (const line of lines) {
+    const k = kindOf(line);
+    if (k === "blank") { pushBlank(); continue; }
+
+    // Heading needs blank before
+    if (k === "heading") pushBlank();
+    // Anything after a heading needs a blank
+    if (last === "heading") pushBlank();
+    // Transition into/out of a list block needs a blank
+    const wasList = last === "bullet" || last === "num";
+    const isList = k === "bullet" || k === "num";
+    if (last !== "start" && wasList !== isList) pushBlank();
+    // Two adjacent prose paragraphs need a blank between
+    if (k === "para" && last === "para") pushBlank();
+
+    out.push(line);
+    last = k;
+  }
+  while (out.length && out[out.length - 1] === "") out.pop();
+  return out.join("\n");
+}
+
+// ---- PDF generation (jsPDF, text-based, markdown-aware) ----
+
+// Strip emoji and other non-Latin1 chars that jsPDF's default font can't render
+function pdfSafe(s) {
+  if (!s) return "";
+  // Remove emoji ranges + variation selectors + zero-width joiners
+  return s.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu, "").trim();
+}
+
+// Strip markdown emphasis/code markers, keep the inner text
+function stripInlineMd(s) {
+  return (s || "")
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/__(.+?)__/g, "$1")
+    .replace(/\*(.+?)\*/g, "$1")
+    .replace(/(^|[^\w])_(.+?)_($|[^\w])/g, "$1$2$3")
+    .replace(/`(.+?)`/g, "$1");
+}
+
+function parseMdLines(text) {
+  // Returns array of {kind, text, level?} blocks
+  if (!text) return [];
+  const blocks = [];
+  const lines = text.split(/\r?\n/);
+  for (const raw of lines) {
+    const line = raw.replace(/\s+$/, "");
+    if (!line.trim()) { blocks.push({ kind: "gap" }); continue; }
+
+    let m;
+    if (m = line.match(/^(#{1,6})\s+(.*)/)) {
+      blocks.push({ kind: "h", level: m[1].length, text: stripInlineMd(m[2]) });
+      continue;
+    }
+    if (m = line.match(/^\s*[-*•]\s+(.*)/)) {
+      blocks.push({ kind: "bullet", text: stripInlineMd(m[1]) });
+      continue;
+    }
+    if (m = line.match(/^\s*(\d+)\.\s+(.*)/)) {
+      blocks.push({ kind: "num", num: m[1], text: stripInlineMd(m[2]) });
+      continue;
+    }
+    blocks.push({ kind: "p", text: stripInlineMd(line) });
+  }
+  return blocks;
+}
+
+async function downloadPdf() {
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    toast("PDF library failed to load");
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: "pt", format: "letter", orientation: "portrait" });
+
+  const PAGE_W = doc.internal.pageSize.getWidth();
+  const PAGE_H = doc.internal.pageSize.getHeight();
+  const MARGIN = 54;
+  const MAX_W = PAGE_W - MARGIN * 2;
+  let y = MARGIN;
+
+  function ensureSpace(needed) {
+    if (y + needed > PAGE_H - MARGIN) {
+      doc.addPage();
+      y = MARGIN;
+    }
+  }
+
+  function writeText(text, opts = {}) {
+    const size = opts.size || 11;
+    const style = opts.style || "normal";
+    const indent = opts.indent || 0;
+    const color = opts.color || [31, 35, 48];
+    const spaceBefore = opts.spaceBefore || 0;
+    const spaceAfter = opts.spaceAfter == null ? 8 : opts.spaceAfter;
+    y += spaceBefore;
+    doc.setFont("helvetica", style);
+    doc.setFontSize(size);
+    doc.setTextColor(color[0], color[1], color[2]);
+    const wrapWidth = MAX_W - indent;
+    const lines = doc.splitTextToSize(text, wrapWidth);
+    const lineHeight = size * 1.4;
+    for (const ln of lines) {
+      ensureSpace(lineHeight);
+      doc.text(ln, MARGIN + indent, y);
+      y += lineHeight;
+    }
+    y += spaceAfter;
+  }
+
+  function writeBullet(text, marker) {
+    const size = 11;
+    const indent = 20;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(size);
+    doc.setTextColor(31, 35, 48);
+    const wrapWidth = MAX_W - indent;
+    const lines = doc.splitTextToSize(text, wrapWidth);
+    const lineHeight = size * 1.4;
+    lines.forEach((ln, i) => {
+      ensureSpace(lineHeight);
+      if (i === 0) {
+        doc.setFont("helvetica", "bold");
+        doc.text(marker || "•", MARGIN + 4, y);
+        doc.setFont("helvetica", "normal");
+      }
+      doc.text(ln, MARGIN + indent, y);
+      y += lineHeight;
+    });
+    y += 6;
+  }
+
+  function writeH1(text) {
+    writeText(text, { size: 22, style: "bold", spaceAfter: 2 });
+  }
+
+  function writeH2(text) {
+    y += 14;
+    ensureSpace(28);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.setTextColor(199, 82, 42);
+    doc.text(text, MARGIN, y);
+    y += 6;
+    doc.setDrawColor(199, 82, 42);
+    doc.setLineWidth(1.2);
+    doc.line(MARGIN, y, MARGIN + MAX_W, y);
+    y += 14;
+  }
+
+  function writeH3(text) {
+    writeText(text, { size: 12.5, style: "bold", spaceBefore: 14, spaceAfter: 6 });
+  }
+
+  function renderBlocks(text) {
+    // Normalize first so we have proper blank lines between blocks
+    const blocks = parseMdLines(normalizeMd(text));
+    let numCounter = 0;
+    for (const b of blocks) {
+      if (b.kind === "gap") { y += 6; numCounter = 0; continue; }
+      if (b.kind === "h") {
+        const t = pdfSafe(b.text);
+        if (!t) continue;
+        if (b.level <= 2) writeH3(t);
+        else writeText(t, { size: 11.5, style: "bold", spaceBefore: 8, spaceAfter: 4 });
+      } else if (b.kind === "bullet") {
+        writeBullet(pdfSafe(b.text), "•");
+      } else if (b.kind === "num") {
+        numCounter++;
+        writeBullet(pdfSafe(b.text), numCounter + ".");
+      } else {
+        writeText(pdfSafe(b.text), { size: 11, spaceAfter: 8 });
+      }
+    }
+  }
+
+  const s = readState();
+
+  // Title
+  const titleParts = ["Weekly Wins"];
+  if (s.weekNum) titleParts.push("Week " + s.weekNum);
+  if (s.dateRange) titleParts.push(s.dateRange);
+  writeH1(titleParts.join("  ·  "));
+  writeText("Generated " + new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }),
+    { size: 9.5, style: "italic", color: [120, 120, 120], spaceAfter: 10 });
+
+  // AI summary (parsed as markdown)
+  if (s.aiSummary) {
+    writeH2("AI Summary");
+    renderBlocks(s.aiSummary);
+  }
+
+  if (s.intentions) {
+    writeH2("This week's intentions");
+    renderBlocks(s.intentions);
+  }
+
+  const anyDay = DAYS.some(d => {
+    const day = s.days[d];
+    return day.meetings || day.did || day.blocked || day.felt;
+  });
+  if (anyDay) {
+    writeH2("Daily log");
+    DAYS.forEach(d => {
+      const day = s.days[d];
+      if (!day.meetings && !day.did && !day.blocked && !day.felt) return;
+      writeH3(`${d}${day.date ? "  ·  " + day.date : ""}`);
+      ["meetings","did","blocked","felt"].forEach(f => {
+        if (day[f]) {
+          // Label in bold, then content
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(10.5);
+          doc.setTextColor(83, 90, 107);
+          const labelText = FIELD_LABELS[f] + ":";
+          const labelWidth = doc.getTextWidth(labelText + " ");
+          ensureSpace(14);
+          doc.text(labelText, MARGIN, y);
+          doc.setFont("helvetica", "normal");
+          doc.setTextColor(31, 35, 48);
+          const wrapWidth = MAX_W - labelWidth;
+          const lines = doc.splitTextToSize(pdfSafe(day[f]), wrapWidth);
+          const lh = 10.5 * 1.35;
+          lines.forEach((ln, i) => {
+            if (i === 0) {
+              doc.text(ln, MARGIN + labelWidth, y);
+            } else {
+              y += lh;
+              ensureSpace(lh);
+              doc.text(ln, MARGIN + labelWidth, y);
+            }
+          });
+          y += lh + 2;
+        }
+      });
+    });
+  }
+
+  if (s.wins)         { writeH2("Wins");           renderBlocks(s.wins); }
+  if (s.frustrations) { writeH2("Frustrations");   renderBlocks(s.frustrations); }
+  if (s.learned)      { writeH2("Learned");        renderBlocks(s.learned); }
+  if (s.nextWeek)     { writeH2("Next week");      renderBlocks(s.nextWeek); }
+
+  const filename = `weekly-wins${s.weekNum ? "-week-"+s.weekNum : ""}${s.dateRange ? "-"+s.dateRange.replace(/[^A-Za-z0-9]+/g,"-") : ""}.pdf`;
+  doc.save(filename);
+}
+
+// ---- Markdown export ----
+function buildMarkdown() {
+  const s = readState();
+  const out = [];
+  const titleBits = ["Weekly Wins"];
+  if (s.weekNum) titleBits.push("Week " + s.weekNum);
+  if (s.dateRange) titleBits.push(s.dateRange);
+  out.push(`# ${titleBits.join(" · ")}`);
+  out.push(`*Generated ${new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}*`);
+  out.push("");
+
+  if (s.aiSummary) {
+    out.push("## AI Summary");
+    out.push("");
+    out.push(normalizeMd(s.aiSummary));
+    out.push("");
+  }
+
+  if (s.intentions) {
+    out.push("## This week's intentions");
+    out.push("");
+    out.push(normalizeMd(s.intentions));
+    out.push("");
+  }
+
+  const anyDay = DAYS.some(d => {
+    const day = s.days[d];
+    return day.meetings || day.did || day.blocked || day.felt;
+  });
+  if (anyDay) {
+    out.push("## Daily log");
+    out.push("");
+    DAYS.forEach(d => {
+      const day = s.days[d];
+      if (!day.meetings && !day.did && !day.blocked && !day.felt) return;
+      out.push(`### ${d}${day.date ? " · " + day.date : ""}`);
+      ["meetings","did","blocked","felt"].forEach(f => {
+        if (day[f]) out.push(`- **${FIELD_LABELS[f]}:** ${day[f]}`);
+      });
+      out.push("");
+    });
+  }
+
+  if (s.wins)         { out.push("## 🏆 Wins");          out.push(""); out.push(normalizeMd(s.wins)); out.push(""); }
+  if (s.frustrations) { out.push("## 😤 Frustrations");  out.push(""); out.push(normalizeMd(s.frustrations)); out.push(""); }
+  if (s.learned)      { out.push("## 💡 Learned");       out.push(""); out.push(normalizeMd(s.learned)); out.push(""); }
+  if (s.nextWeek)     { out.push("## 🔮 Next week");     out.push(""); out.push(normalizeMd(s.nextWeek)); out.push(""); }
+
+  return out.join("\n");
+}
+
+function downloadMarkdown() {
+  const s = readState();
+  const md = buildMarkdown();
+  const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `weekly-wins${s.weekNum ? "-week-"+s.weekNum : ""}${s.dateRange ? "-"+s.dateRange.replace(/[^A-Za-z0-9]+/g,"-") : ""}.md`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+document.getElementById("downloadMdBtn").addEventListener("click", () => {
+  try {
+    downloadMarkdown();
+    toast("✓ Markdown saved");
+  } catch (e) {
+    console.error(e);
+    toast("Markdown export failed");
+  }
+});
+
+document.getElementById("downloadPdfBtn").addEventListener("click", async () => {
+  const btn = document.getElementById("downloadPdfBtn");
+  const orig = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "Building PDF…";
+  try {
+    await downloadPdf();
+    toast("✓ PDF saved");
+  } catch (e) {
+    console.error(e);
+    toast("PDF failed — check console");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = orig;
+  }
+});
+
+// ---- Init ----
+loadState();
+updatePromptPreview();
+</script>
+</body>
+</html>
